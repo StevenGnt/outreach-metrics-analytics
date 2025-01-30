@@ -1,0 +1,13 @@
+{
+  "name": "outreach-metrics-analytics",
+  "version": "1.0.0",
+  "description": "Export analytics from outreach metrics (Notion.so sheet)",
+  "main": "index.js",
+  "author": "Steven Gangnant",
+  "dependencies": {
+    "cli-table": "^0.3.11",
+    "csv-parser": "^3.1.0",
+    "date-fns": "^4.1.0",
+    "fs": "^0.0.1-security"
+  }
+}
