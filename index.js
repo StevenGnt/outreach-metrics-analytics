@@ -156,7 +156,7 @@ function getAnalytics(rows) {
             currentWeekStats.casualCallsBooked++
         }
 
-        if (row['CCasual Call Attended']) {
+        if (row['Casual Call Attended']) {
             currentWeekStats.casualCallsAttended++
         }
 
@@ -212,7 +212,7 @@ function getMetadata(analytics) {
 
     return {
         responseRate: getPercentage(firstContactsReplies, firstContacts),
-        attendanceRate: getPercentage(casualCallsBooked, casualCallsAttended)
+        attendanceRate: getPercentage(casualCallsAttended, casualCallsBooked)
     };
 }
 
