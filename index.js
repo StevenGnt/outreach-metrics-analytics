@@ -273,11 +273,17 @@ const args = getArgs();
 const { file, startDate, endDate } = args;
 const filters = { startDate, endDate };
 
+// Title
+const title = new cliTable({ head: [`Analytics for ${file}`]});
+console.log('');
+console.log(title.toString());
+console.log('');
+
 // Temporary warning
-const warning = new cliTable({ head: ["Don't forget to save the metrics file with UTF-8 WITHOUT BOM !"]});
-console.log('');
-console.log(warning.toString());
-console.log('');
+// const warning = new cliTable({ head: ["Don't forget to save the metrics file with UTF-8 WITHOUT BOM !"]});
+// console.log('');
+// console.log(warning.toString());
+// console.log('');
 
 getCsvData(file)
     .then(formatResults)
