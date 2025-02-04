@@ -189,12 +189,15 @@ function getAnalytics(rows) {
     return { byWeek, totalAnalytics };
 }
 
-function getPercentage(count, total) {
-    const percentage = total != 0
-        ? Math.round((count / total) * 100)
-        : 0;
+function getAnalytyicsPercentage(count, total) {
+    return total != 0
+        ? getPercentage(count, total)
+        : '--';
 
-    return `${percentage} %`;
+}
+
+function getPercentage(count, total) {
+    return `${Math.round((count / total) * 100)} %`;
 }
 
 /**
@@ -211,8 +214,8 @@ function getMetadata(analytics) {
     } = analytics;
 
     return {
-        responseRate: getPercentage(firstContactsReplies, firstContacts),
-        attendanceRate: getPercentage(casualCallsAttended, casualCallsBooked)
+        responseRate: getAnalytyicsPercentage(firstContactsReplies, firstContacts),
+        attendanceRate: getAnalytyicsPercentage(casualCallsAttended, casualCallsBooked)
     };
 }
 
@@ -274,7 +277,7 @@ const { file, startDate, endDate } = args;
 const filters = { startDate, endDate };
 
 // Title
-const title = new cliTable({ head: [`Analytics for ${file}`]});
+const title = new cliTable({ head: [`Analytics for ${file}`] });
 console.log('');
 console.log(title.toString());
 console.log('');
