@@ -97,9 +97,12 @@ function getAnalytics(rows) {
 function saveAnalyticsCsv(analytics, filename) {
     const rows = [['Date', ...analyticsFields]];
 
-    Object.keys(analytics.byWeek).forEach(weekKey => {
-        rows.push([weekKey, ...Object.values(analytics.byWeek[weekKey])]);
-    });
+    Object.keys(analytics.byWeek)
+        .sort()
+        .reverse()
+        .forEach(weekKey => {
+            rows.push([weekKey, ...Object.values(analytics.byWeek[weekKey])]);
+        });
 
     rows.push(['Total', ...Object.values(analytics.totalAnalytics)]);
 

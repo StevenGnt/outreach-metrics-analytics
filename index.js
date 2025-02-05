@@ -134,7 +134,7 @@ getCsvData(file)
     .then(analytics => {
         if (hasArg('--save-csv')) {
             const datestamp = dateFns.format(new Date(), 'yyyy-mm-dd--HH-mm');
-            const csvOutputFilename = `${file} analytics - ${datestamp}.csv`;
+            const csvOutputFilename = `./analytics/${file} analytics - ${datestamp}.csv`;
 
             console.log('Saving analytics as CSV under', csvOutputFilename);
             saveAnalyticsCsv(analytics, csvOutputFilename);
