@@ -145,7 +145,5 @@ getCsvData(file)
     .then(outputAnalytics);
 
 // @todo
-// Not having to re save as UTF8 without BOM
 // Filtering rows on date
-// Analytics
 // Timezone stuff
