@@ -1,3 +1,6 @@
+const fs = require('fs')
+
+const { analyticsFields } = require('./constants');
 const { getWeekKey, getPercentage } = require('./utils');
 
 function getAnalytyicsPercentage(count, total) {
@@ -23,7 +26,7 @@ function getMetadata(analytics) {
 
     return {
         'Response rate': getAnalytyicsPercentage(firstContactsReplies, firstContacts),
-        'Attendance rate' : getAnalytyicsPercentage(casualCallsAttended, casualCallsBooked),
+        'Attendance rate': getAnalytyicsPercentage(casualCallsAttended, casualCallsBooked),
         'Proof session rate': getAnalytyicsPercentage(proofSessionsAttended, proofSessionsBooked)
     };
 }
@@ -88,8 +91,29 @@ function getAnalytics(rows) {
 
     Object.assign(totalAnalytics, getMetadata(totalAnalytics));
 
-    console.log({ byWeek, totalAnalytics });
     return { byWeek, totalAnalytics };
 }
 
-module.exports = { getAnalytics };
+function saveAnalyticsCsv(analytics, filename) {
+    const rows = [['Date', ...analyticsFields]];
+
+    Object.keys(analytics.byWeek).forEach(weekKey => {
+        rows.push([weekKey, ...Object.values(analytics.byWeek[weekKey])]);
+    });
+
+    rows.push(['Total', ...Object.values(analytics.totalAnalytics)]);
+
+    const csvOutput = rows.map(entries => entries.join(';')).join('\n');
+
+    return new Promise((resolve, reject) => {
+        fs.writeFile(filename, csvOutput, (err) => {
+            err
+                ? reject(err)
+                : resolve();
+        });
+
+    });
+
+}
+
+module.exports = { getAnalytics, saveAnalyticsCsv };

@@ -1,8 +1,10 @@
-const csv = require('csv-parser')
 const fs = require('fs')
+const csv = require('csv-parser')
+const dateFns = require('date-fns');
 const cliTable = require('cli-table');
 
-const { getAnalytics } = require('./analytics');
+const { analyticsFields } = require('./constants');
+const { getAnalytics, saveAnalyticsCsv } = require('./analytics');
 const { reformatDateFields } = require('./utils');
 
 /**
@@ -32,7 +34,6 @@ function getCsvData(csvFilename) {
             .on('end', () => {
                 resolve(results);
             });
-
     });
 }
 
@@ -69,18 +70,6 @@ function filterResults(rows, filters) {
 function outputAnalytics(analytics) {
     const { byWeek, totalAnalytics } = analytics;
 
-    const fieldsDisplayed = [
-        'First Contacted',
-        'Prospect First Reply',
-        'Casual Call Booked',
-        'Casual Call Attended',
-        'Proof Session Booked',
-        'Proof Session Attended',
-        'Response rate',
-        'Attendance rate',
-        'Proof session rate',
-    ];
-
     const commonParameters = {}; // colWidths: ['1', '1', '1'] };
 
     /**
@@ -89,12 +78,12 @@ function outputAnalytics(analytics) {
      * @returns 
     */
     function analyticsAsArray(analytics) {
-        return fieldsDisplayed
+        return analyticsFields
             .map(key => analytics[key]);
     }
 
     // By week
-    const byWeekTableOutput = new cliTable({ head: ['Week', ...fieldsDisplayed], ...commonParameters });
+    const byWeekTableOutput = new cliTable({ head: ['Week', ...analyticsFields], ...commonParameters });
 
     Object.keys(byWeek)
         .sort()
@@ -104,7 +93,7 @@ function outputAnalytics(analytics) {
         });
 
     // Total
-    const totalTableOutput = new cliTable({ head: fieldsDisplayed, ...commonParameters });
+    const totalTableOutput = new cliTable({ head: analyticsFields, ...commonParameters });
     totalTableOutput.push(analyticsAsArray(totalAnalytics));
 
     // Print
@@ -118,6 +107,11 @@ function outputAnalytics(analytics) {
 }
 
 const args = getArgs();
+
+function hasArg(argName) {
+    return argName in args;
+}
+
 const { file, startDate, endDate } = args;
 const filters = { startDate, endDate };
 
@@ -137,6 +131,17 @@ getCsvData(file)
     .then(formatResults)
     .then(results => filterResults(results, filters))
     .then(getAnalytics)
+    .then(analytics => {
+        if (hasArg('--save-csv')) {
+            const datestamp = dateFns.format(new Date(), 'yyyy-mm-dd--HH-mm');
+            const csvOutputFilename = `${file} analytics - ${datestamp}.csv`;
+
+            console.log('Saving analytics as CSV under', csvOutputFilename);
+            saveAnalyticsCsv(analytics, csvOutputFilename);
+        }
+
+        return analytics;
+    })
     .then(outputAnalytics);
 
 // @todo
