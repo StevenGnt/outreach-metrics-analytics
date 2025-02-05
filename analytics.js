@@ -1,11 +1,9 @@
 const { getWeekKey, getPercentage } = require('./utils');
 
-
 function getAnalytyicsPercentage(count, total) {
     return total != 0
         ? getPercentage(count, total)
         : '--';
-
 }
 
 /**
@@ -15,15 +13,18 @@ function getAnalytyicsPercentage(count, total) {
  */
 function getMetadata(analytics) {
     const {
-        firstContactsReplies,
-        firstContacts,
-        casualCallsBooked,
-        casualCallsAttended,
+        'First Contacted': firstContacts,
+        'Prospect First Reply': firstContactsReplies,
+        'Casual Call Attended': casualCallsAttended,
+        'Casual Call Booked': casualCallsBooked,
+        'Proof Session Attended': proofSessionsAttended,
+        'Proof Session Booked': proofSessionsBooked,
     } = analytics;
 
     return {
-        responseRate: getAnalytyicsPercentage(firstContactsReplies, firstContacts),
-        attendanceRate: getAnalytyicsPercentage(casualCallsAttended, casualCallsBooked)
+        'Response rate': getAnalytyicsPercentage(firstContactsReplies, firstContacts),
+        'Attendance rate' : getAnalytyicsPercentage(casualCallsAttended, casualCallsBooked),
+        'Proof session rate': getAnalytyicsPercentage(proofSessionsAttended, proofSessionsBooked)
     };
 }
 
@@ -33,7 +34,23 @@ function getMetadata(analytics) {
  * @returns {object}
  */
 function getAnalytics(rows) {
+    const collectedFields = [
+        'First Contacted',
+        'Prospect First Reply',
+        'Casual Call Booked',
+        'Casual Call Attended',
+        'Proof Session Booked',
+        'Proof Session Attended',
+    ];
+
     const byWeek = {};
+
+    const getDefaultAnalytics = () => {
+        return collectedFields.reduce(
+            (acc, fieldName) => ({ ...acc, [fieldName]: 0 }),
+            {}
+        );
+    }
 
     rows.forEach(row => {
         if (!row['First Contacted']) {
@@ -41,46 +58,28 @@ function getAnalytics(rows) {
         }
 
         const weekKey = getWeekKey(row['First Contacted']);
-        const currentWeekStats = byWeek[weekKey] ||
-        {
-            firstContacts: 0,
-            firstContactsReplies: 0,
-            casualCallsBooked: 0,
-            casualCallsAttended: 0,
-        };
 
-        currentWeekStats.firstContacts++;
+        const currentWeekStats = byWeek[weekKey] || getDefaultAnalytics();
 
-        if (row['Prospect First Reply']) {
-            currentWeekStats.firstContactsReplies++
-        }
+        // currentWeekStats.firstContacts++;
 
-        if (row['Casual Call Booked']) {
-            currentWeekStats.casualCallsBooked++
-        }
-
-        if (row['Casual Call Attended']) {
-            currentWeekStats.casualCallsAttended++
-        }
+        collectedFields.forEach(fieldName => {
+            if (row[fieldName]) {
+                currentWeekStats[fieldName]++;
+            }
+        });
 
         byWeek[weekKey] = currentWeekStats;
     });
 
     // Build total stats
-    const concatenatedProperties = [
-        'firstContacts',
-        'firstContactsReplies',
-        'casualCallsBooked',
-        'casualCallsAttended'
-    ];
-
     const totalAnalytics = Object.keys(byWeek).reduce((acc, weekKey) => {
-        concatenatedProperties.forEach(property => {
-            acc[property] = (acc[property] || 0) + byWeek[weekKey][property];
+        collectedFields.forEach(fieldName => {
+            acc[fieldName] = (acc[fieldName] || 0) + byWeek[weekKey][fieldName];
         });
 
         return acc;
-    }, {});
+    }, getDefaultAnalytics());
 
     // Metadata
     Object.keys(byWeek).forEach(weekKey => {
@@ -89,6 +88,7 @@ function getAnalytics(rows) {
 
     Object.assign(totalAnalytics, getMetadata(totalAnalytics));
 
+    console.log({ byWeek, totalAnalytics });
     return { byWeek, totalAnalytics };
 }
 

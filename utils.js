@@ -1,16 +1,25 @@
 const dateFns = require('date-fns');
 
+/**
+ * Show the percentage of a ratio
+ * @param {number} count 
+ * @param {number} total 
+ * @returns {string}
+ */
 function getPercentage(count, total) {
     return `${Math.round((count / total) * 100)} %`;
 }
 
-
+/**
+ * Returns the key used to identify a week ("2024W10")
+ * @param {date} date 
+ * @returns {string}
+ */
 function getWeekKey(date) {
     const rowContacYear = dateFns.format(date, 'yyyy')
     const rowContacWeek = dateFns.format(date, 'ww')
     return `${rowContacYear}-W${rowContacWeek}`;
 }
-
 
 /**
  * Reformat date fields to an easily manipulated format
@@ -37,10 +46,14 @@ function reformatDateFields(row) {
         );
 }
 
+/**
+ * Date timezone shenanigans (to be solved)
+ * @param {date} date 
+ * @returns 
+ */
 function adjustDate(date) {
     return dateFns.add(date, { hours: 1 }); // Compensate current timezone offset
 }
-
 
 /**
  * Format a date field into a more usable format

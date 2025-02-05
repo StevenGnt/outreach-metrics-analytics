@@ -69,30 +69,32 @@ function filterResults(rows, filters) {
 function outputAnalytics(analytics) {
     const { byWeek, totalAnalytics } = analytics;
 
-    // Map between analytic property > table header name
-    const analyticsDisplayedProperties = {
-        'firstContacts': 'First contacts',
-        'firstContactsReplies': 'Replies',
-        'responseRate': 'Response rate',
-        'casualCallsBooked': 'Casual calls booked',
-        'casualCallsAttended': 'Attended',
-        'attendanceRate': 'Attendance rate',
-    };
+    const fieldsDisplayed = [
+        'First Contacted',
+        'Prospect First Reply',
+        'Casual Call Booked',
+        'Casual Call Attended',
+        'Proof Session Booked',
+        'Proof Session Attended',
+        'Response rate',
+        'Attendance rate',
+        'Proof session rate',
+    ];
 
-    const commonTableHeaders = Object.values(analyticsDisplayedProperties);
     const commonParameters = {}; // colWidths: ['1', '1', '1'] };
 
     /**
+     * Ensure data is in order before being sent to the table
      * @param {object} analytics
      * @returns 
     */
     function analyticsAsArray(analytics) {
-        return Object.keys(analyticsDisplayedProperties)
+        return fieldsDisplayed
             .map(key => analytics[key]);
     }
 
     // By week
-    const byWeekTableOutput = new cliTable({ head: ['Week', ...commonTableHeaders], ...commonParameters });
+    const byWeekTableOutput = new cliTable({ head: ['Week', ...fieldsDisplayed], ...commonParameters });
 
     Object.keys(byWeek)
         .sort()
@@ -102,7 +104,7 @@ function outputAnalytics(analytics) {
         });
 
     // Total
-    const totalTableOutput = new cliTable({ head: commonTableHeaders, ...commonParameters });
+    const totalTableOutput = new cliTable({ head: fieldsDisplayed, ...commonParameters });
     totalTableOutput.push(analyticsAsArray(totalAnalytics));
 
     // Print
