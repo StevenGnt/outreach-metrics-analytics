@@ -1,7 +1,9 @@
 const csv = require('csv-parser')
 const fs = require('fs')
-const dateFns = require('date-fns');
 const cliTable = require('cli-table');
+
+const { getAnalytics } = require('./analytics');
+const { reformatDateFields } = require('./utils');
 
 /**
  * Return CLI args
@@ -35,64 +37,6 @@ function getCsvData(csvFilename) {
 }
 
 /**
- * Reformat date fields to an easily manipulated format
- * @param {object} row 
- * @returns {object}
- */
-function reformatDateFields(row) {
-    // List of fields to reformat
-    const dateFieldsToReformat = [
-        'First Contacted',
-        'Prospect First Reply',
-        'Follow Up Date',
-    ];
-
-    return dateFieldsToReformat
-        .reduce(
-            (acc, currentFieldName) => ({
-                ...acc,
-                [currentFieldName]: row[currentFieldName]
-                    ? formatDateField(row[currentFieldName])
-                    : row[currentFieldName]
-            }),
-            {}
-        );
-}
-
-/**
- * Format a date field into a more usable format
- * @param {*} value 
- * @returns 
- */
-function formatDateField(value) {
-    // Month are displayed with their french names
-    const translatedMonths = {
-        'janvier': '01',
-        'février': '02',
-        'mars': '03',
-        'avril': '04',
-        'mai': '05',
-        'juin': '06',
-        'juillet': '07',
-        'août': '08',
-        'septembre': '09',
-        'octobre': '10',
-        'novembre': '11',
-        'décembre': '12',
-    }
-
-    const [day, frenchMonth, year] = value.split(' ');
-
-    const parsed = dateFns.parse(`${year}-${translatedMonths[frenchMonth]}-${day}`, 'yyyy-MM-dd', new Date());
-
-    return adjustDate(parsed);
-}
-
-function adjustDate(date) {
-    return dateFns.add(date, { hours: 1 }); // Compensate current timezone offset
-}
-
-/**
  * Format the loaded results
  * @param {array} rows
  * @returns {array}
@@ -116,107 +60,6 @@ function filterResults(rows, filters) {
 
         return true;
     });
-}
-
-function getWeekKey(date) {
-    const rowContacYear = dateFns.format(date, 'yyyy')
-    const rowContacWeek = dateFns.format(date, 'ww')
-    return `${rowContacYear}-W${rowContacWeek}`;
-}
-
-/**
- * Get the interesting data analytics
- * @param {array} rows
- * @returns {object}
- */
-function getAnalytics(rows) {
-    const byWeek = {};
-
-    rows.forEach(row => {
-        if (!row['First Contacted']) {
-            return;
-        }
-
-        const weekKey = getWeekKey(row['First Contacted']);
-        const currentWeekStats = byWeek[weekKey] ||
-        {
-            firstContacts: 0,
-            firstContactsReplies: 0,
-            casualCallsBooked: 0,
-            casualCallsAttended: 0,
-        };
-
-        currentWeekStats.firstContacts++;
-
-        if (row['Prospect First Reply']) {
-            currentWeekStats.firstContactsReplies++
-        }
-
-        if (row['Casual Call Booked']) {
-            currentWeekStats.casualCallsBooked++
-        }
-
-        if (row['Casual Call Attended']) {
-            currentWeekStats.casualCallsAttended++
-        }
-
-        byWeek[weekKey] = currentWeekStats;
-    });
-
-    // Build total stats
-    const concatenatedProperties = [
-        'firstContacts',
-        'firstContactsReplies',
-        'casualCallsBooked',
-        'casualCallsAttended'
-    ];
-
-    const totalAnalytics = Object.keys(byWeek).reduce((acc, weekKey) => {
-        concatenatedProperties.forEach(property => {
-            acc[property] = (acc[property] || 0) + byWeek[weekKey][property];
-        });
-
-        return acc;
-    }, {});
-
-    // Metadata
-    Object.keys(byWeek).forEach(weekKey => {
-        byWeek[weekKey] = { ...byWeek[weekKey], ...getMetadata(byWeek[weekKey]) };
-    });
-
-    Object.assign(totalAnalytics, getMetadata(totalAnalytics));
-
-    return { byWeek, totalAnalytics };
-}
-
-function getAnalytyicsPercentage(count, total) {
-    return total != 0
-        ? getPercentage(count, total)
-        : '--';
-
-}
-
-function getPercentage(count, total) {
-    return `${Math.round((count / total) * 100)} %`;
-}
-
-/**
- * Build analytics data
- * @param {*} analytics 
- * @returns 
- */
-function getMetadata(analytics) {
-    const {
-        firstContactsReplies,
-        firstContacts,
-        casualCallsBooked,
-        casualCallsAttended,
-    } = analytics;
-
-    return {
-        responseRate: getAnalytyicsPercentage(firstContactsReplies, firstContacts),
-        attendanceRate: getAnalytyicsPercentage(casualCallsAttended, casualCallsBooked)
-    };
 }
 
 /**
