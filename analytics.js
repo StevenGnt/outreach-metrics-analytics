@@ -116,7 +116,6 @@ function saveAnalyticsCsv(analytics, filename) {
         });
 
     });
-
 }
 
 module.exports = { getAnalytics, saveAnalyticsCsv };
