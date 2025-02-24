@@ -3,7 +3,7 @@ const csv = require('csv-parser')
 const dateFns = require('date-fns');
 const cliTable = require('cli-table');
 
-const { analyticsFields } = require('./constants');
+const { analyticsFields, analyticsFieldBoolean } = require('./constants');
 const { getAnalytics, saveAnalyticsCsv } = require('./analytics');
 const { reformatDateFields } = require('./utils');
 
