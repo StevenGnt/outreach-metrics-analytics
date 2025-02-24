@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-const { analyticsFields } = require('./constants');
+const { analyticsFields, analyticsFieldBoolean } = require('./constants');
 const { getWeekKey, getPercentage } = require('./utils');
 
 function getAnalytyicsPercentage(count, total) {
@@ -18,6 +18,7 @@ function getMetadata(analytics) {
     const {
         'First Contacted': firstContacts,
         'Prospect First Reply': firstContactsReplies,
+        'Good conversation': goodConversations,
         'Casual Call Attended': casualCallsAttended,
         'Casual Call Booked': casualCallsBooked,
         'Proof Session Attended': proofSessionsAttended,
@@ -26,6 +27,7 @@ function getMetadata(analytics) {
 
     return {
         'Response rate': getAnalytyicsPercentage(firstContactsReplies, firstContacts),
+        'Good conversation rate': getAnalytyicsPercentage(goodConversations, firstContactsReplies),
         'Attendance rate': getAnalytyicsPercentage(casualCallsAttended, casualCallsBooked),
         'Proof session rate': getAnalytyicsPercentage(proofSessionsAttended, proofSessionsBooked)
     };
@@ -40,6 +42,7 @@ function getAnalytics(rows) {
     const collectedFields = [
         'First Contacted',
         'Prospect First Reply',
+        'Good conversation',
         'Casual Call Booked',
         'Casual Call Attended',
         'Proof Session Booked',
@@ -67,7 +70,12 @@ function getAnalytics(rows) {
         // currentWeekStats.firstContacts++;
 
         collectedFields.forEach(fieldName => {
-            if (row[fieldName]) {
+            if (analyticsFieldBoolean.includes(fieldName)) {
+                if (row[fieldName] === 'Yes') {
+                    currentWeekStats[fieldName]++;
+                }
+            }
+            else if (row[fieldName]) {
                 currentWeekStats[fieldName]++;
             }
         });
