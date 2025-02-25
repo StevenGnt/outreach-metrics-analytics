@@ -112,7 +112,7 @@ function hasArg(argName) {
     return argName in args;
 }
 
-const { file, startDate, endDate } = args;
+const { '--file': file, startDate, endDate } = args;
 const filters = { startDate, endDate };
 
 // Title
