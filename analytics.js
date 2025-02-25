@@ -23,13 +23,21 @@ function getMetadata(analytics) {
         'Casual Call Booked': casualCallsBooked,
         'Proof Session Attended': proofSessionsAttended,
         'Proof Session Booked': proofSessionsBooked,
+        'Sales Call Attended': salesCallsAttended,
+        'Sales Call Booked': salesCallsBooked,
+        'Sale Closed': salesClosed,
     } = analytics;
 
     return {
-        'Response rate': getAnalytyicsPercentage(firstContactsReplies, firstContacts),
-        'Good conversation rate': getAnalytyicsPercentage(goodConversations, firstContactsReplies),
-        'Attendance rate': getAnalytyicsPercentage(casualCallsAttended, casualCallsBooked),
-        'Proof session rate': getAnalytyicsPercentage(proofSessionsAttended, proofSessionsBooked)
+        'Response %': getAnalytyicsPercentage(firstContactsReplies, firstContacts),
+        'Good conversation %': getAnalytyicsPercentage(goodConversations, firstContacts),
+        'CC booking %': getAnalytyicsPercentage(casualCallsBooked, firstContacts),
+        'CC attendance %': getAnalytyicsPercentage(casualCallsAttended, casualCallsBooked),
+        'PS booking %': getAnalytyicsPercentage(proofSessionsBooked, casualCallsBooked),
+        'PS attendance %': getAnalytyicsPercentage(proofSessionsAttended, proofSessionsBooked),
+        'SC booking %': getAnalytyicsPercentage(salesCallsBooked, proofSessionsAttended),
+        'SC attendance %': getAnalytyicsPercentage(salesCallsAttended, salesCallsBooked),
+        'SC close %': getAnalytyicsPercentage(salesClosed, salesCallsAttended),
     };
 }
 
@@ -47,6 +55,9 @@ function getAnalytics(rows) {
         'Casual Call Attended',
         'Proof Session Booked',
         'Proof Session Attended',
+        'Sales Call Booked',
+        'Sales Call Attended',
+        'Sale Closed',
     ];
 
     const byWeek = {};

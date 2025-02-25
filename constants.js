@@ -7,10 +7,18 @@ const analyticsFields = [
     'Casual Call Attended',
     'Proof Session Booked',
     'Proof Session Attended',
-    'Response rate',
-    'Good conversation rate',
-    'Attendance rate',
-    'Proof session rate',
+    'Sales Call Booked',
+    'Sales Call Attended',
+    'Sale Closed',
+    'Response %',
+    'Good conversation %',
+    'CC booking %',
+    'CC attendance %',
+    'PS booking %',
+    'PS attendance %',
+    'SC booking %',
+    'SC attendance %',
+    'SC close %',
 ];
 
 const analyticsFieldBoolean = [
