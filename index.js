@@ -1,11 +1,11 @@
 const fs = require('fs')
 const csv = require('csv-parser')
-const dateFns = require('date-fns');
+const { format, parse, compareAsc } = require('date-fns');
 const cliTable = require('cli-table');
 
 const { analyticsFields } = require('./constants');
 const { getAnalytics, saveAnalyticsCsv } = require('./analytics');
-const { reformatDateFields } = require('./utils');
+const { reformatDateFields, adjustDate } = require('./utils');
 
 /**
  * Return CLI args
@@ -50,16 +50,47 @@ function formatResults(rows) {
     }))
 }
 
-function filterResults(rows, filters) {
+/**
+ * Parse a CLI date parameter
+ * @param {string} paramDate 
+ */
+function parseParamDate(paramDate) {
+    const [year, month, day] = paramDate.split('-');
+    const parsed = parse(`${year}-${month}-${day}`, 'yyyy-MM-dd', new Date());
+    return adjustDate(parsed);
+}
+
+function filterResults(rows, { startDate, endDate }) {
+    const truthyTest = () => true;
+
+    let testStartDate = truthyTest;
+    let testEndDate = truthyTest;
+
+    if (startDate) {
+        const parsedStartDate = parseParamDate(startDate);
+        testStartDate = rowFirstContacted => {
+            const result = compareAsc(rowFirstContacted, parsedStartDate);
+            return result === 1 || result === 0;
+        };
+    }
+
+    if (endDate) {
+        const parsedEndDate = parseParamDate(endDate);
+
+        testEndDate = rowFirstContacted => {
+            const result = compareAsc(rowFirstContacted, parsedEndDate);
+            return result === -1 || result === 0;
+        };
+    }
+
     return rows.filter(row => {
-        // Empty row
-        // if (!row.Artist) {
-        //     return false;
-        // }
+        if (!row['First Contacted']) {
+            return false;
+        }
 
-        // @todo Use filters
+        const rowFirstContacted = row['First Contacted'];
 
-        return true;
+        return testStartDate(rowFirstContacted) && testEndDate(rowFirstContacted);
     });
 }
 
@@ -112,7 +143,11 @@ function hasArg(argName) {
     return argName in args;
 }
 
-const { '--file': file, startDate, endDate } = args;
+const {
+    '--file': file,
+    '--start-date': startDate,
+    '--end-date': endDate,
+} = args;
 const filters = { startDate, endDate };
 
 // Title
@@ -121,19 +156,13 @@ console.log('');
 console.log(title.toString());
 console.log('');
 
-// Temporary warning
-// const warning = new cliTable({ head: ["Don't forget to save the metrics file with UTF-8 WITHOUT BOM !"]});
-// console.log('');
-// console.log(warning.toString());
-// console.log('');
-
 getCsvData(file)
     .then(formatResults)
     .then(results => filterResults(results, filters))
     .then(getAnalytics)
     .then(analytics => {
         if (hasArg('--save-csv')) {
-            const datestamp = dateFns.format(new Date(), 'yyyy-MM-dd--HH-mm');
+            const datestamp = format(new Date(), 'yyyy-MM-dd--HH-mm-ss');
             const csvOutputFilename = `./analytics/${file} analytics - ${datestamp}.csv`;
 
             console.log('Saving analytics as CSV under', csvOutputFilename);
@@ -145,5 +174,4 @@ getCsvData(file)
     .then(outputAnalytics);
 
 // @todo
-// Filtering rows on date
 // Timezone stuff

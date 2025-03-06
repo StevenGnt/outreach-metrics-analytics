@@ -89,4 +89,5 @@ module.exports = {
     getWeekKey,
     reformatDateFields,
     formatDateField,
+    adjustDate,
 };
