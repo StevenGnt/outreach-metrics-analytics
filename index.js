@@ -1,4 +1,5 @@
 const fs = require('fs')
+const path = require('path');
 const csv = require('csv-parser')
 const { format, parse, compareAsc } = require('date-fns');
 
@@ -112,7 +113,7 @@ getCsvData(file)
     .then(analytics => {
         if (hasArg('--save-csv')) {
             const datestamp = format(new Date(), 'yyyy-MM-dd--HH-mm-ss');
-            const csvOutputFilename = `./analytics/${file} analytics - ${datestamp}.csv`;
+            const csvOutputFilename = `./analytics/${path.basename(file)} analytics - ${datestamp}.csv`;
 
             console.log('Saving analytics as CSV under', csvOutputFilename);
             saveAnalyticsCsv(analytics, csvOutputFilename);
