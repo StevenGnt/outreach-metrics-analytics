@@ -89,6 +89,7 @@ const NOTION_ANALYTICS_FIELDS_MAP = [
 
 // Each existing "Current step" field value
 const NOTION_CURRENT_STEP = {
+    CONVERSATION_TO_START: 'Conversation to start',
     STARTED_CONVERSATION: 'Started conversation',
     GOOD_CONVERSATION: 'Good conversation',
     CC_ASKED: 'CC asked',
@@ -104,8 +105,9 @@ const NOTION_CURRENT_STEP = {
     DEAD_LEAD: 'Dead lead',
 };
 
-// Sequential order of the "Current step" steps
+// Sequential order of the "Current step" steps (used for some computations)
 const NOTION_CURRENT_STEP_ORDER = [
+    NOTION_CURRENT_STEP.CONVERSATION_TO_START,
     NOTION_CURRENT_STEP.STARTED_CONVERSATION,
     NOTION_CURRENT_STEP.GOOD_CONVERSATION,
     NOTION_CURRENT_STEP.CC_ASKED,
