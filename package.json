@@ -4,6 +4,9 @@
   "description": "Export analytics from outreach metrics (Notion.so sheet)",
   "main": "index.js",
   "author": "Steven Gangnant",
+    "bin": {
+    "outreach-metrics-analytics": "./index.js"
+  },
   "dependencies": {
     "cli-table": "^0.3.11",
     "csv-parser": "^3.1.0",

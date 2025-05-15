@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const fs = require('fs')
 const path = require('path');
 const csv = require('csv-parser')
@@ -101,10 +103,15 @@ function hasArg(argName) {
 
 const {
     '--file': file,
+    '--output': output,
     '--start-date': startDate,
     '--end-date': endDate,
 } = args;
 const filters = { startDate, endDate };
+
+if (!file) {
+    throw new Error('No input file specified');
+}
 
 getCsvData(file)
     .then(formatResults)
@@ -113,7 +120,8 @@ getCsvData(file)
     .then(analytics => {
         if (hasArg('--save-csv')) {
             const datestamp = format(new Date(), 'yyyy-MM-dd--HH-mm-ss');
-            const csvOutputFilename = `./analytics/${path.basename(file)} analytics - ${datestamp}.csv`;
+            const outputDir = output || process.cwd();
+            const csvOutputFilename = path.join(outputDir, `${path.basename(file)} analytics - ${datestamp}.csv`);
 
             console.log('Saving analytics as CSV under', csvOutputFilename);
             saveAnalyticsCsv(analytics, csvOutputFilename);
