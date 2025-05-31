@@ -7,7 +7,7 @@ const dateFns = require('date-fns');
  * @returns {string}
  */
 function getPercentage(count, total) {
-    return `${Math.round((count / total) * 100)} %`;
+    return `${Math.round((count / total) * 100)}`;
 }
 
 /**
