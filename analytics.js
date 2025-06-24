@@ -5,10 +5,9 @@ const cliTable = require('cli-table');
 const {
     ANALYTICS_COLLECTED_FIELDS,
     NOTION_ANALYTICS_FIELDS_MAP,
-    NOTION_CURRENT_STEP,
-    NOTION_CURRENT_STEP_ORDER,
     ANALYTICS_METADATA_FIELDS,
     OUTPUT_ANALYTICS_FIELDS_ORDER,
+    NOTION_TAGS,
 } = require('./constants');
 const { getWeekKey, getPercentage } = require('./utils');
 
@@ -70,21 +69,6 @@ function getMetadata(analytics) {
 }
 
 /**
- * Check if a given row's current step is at or after a given step
- * @param {Object} row Notion row
- * @param {string} step
- * @returns {boolean}
- */
-function isRowCurrentStepAtOrAfter(row, step) {
-    const { 'Current step': rowCurrentStep } = row;
-
-    const rowCurrentStepOrder = NOTION_CURRENT_STEP_ORDER.indexOf(rowCurrentStep)
-    const comparedStepOrder = NOTION_CURRENT_STEP_ORDER.indexOf(step);
-
-    return rowCurrentStepOrder >= comparedStepOrder;
-}
-
-/**
  * Get the interesting data analytics
  * @param {array} rows
  * @returns {object}
@@ -118,14 +102,15 @@ function getWeeklyAnalytics(rows) {
             }
         });
 
-        // Fields depending on current step
-        if (isRowCurrentStepAtOrAfter(row, NOTION_CURRENT_STEP.GOOD_CONVERSATION)) {
+        const tags = row.Tags ? row.Tags.split(',') : [];
+
+        // Gond convo
+        if (
+            tags.includes(NOTION_TAGS.GOOD_CONVERSATION)
+            || !['Conversation to start', 'Started conversation'].includes(row['Current step'])
+        ) {
             currentWeekStats[ANALYTICS_COLLECTED_FIELDS.GOOD_CONVERSATION]++;
         }
-
-        // if (isRowCurrentStepAtOrAfter(row, NOTION_CURRENT_STEP.CC_ASKED)) {
-        //     currentWeekStats[ANALYTICS_COLLECTED_FIELDS.CC_ASKED]++;
-        // }
 
         byWeek[weekKey] = currentWeekStats;
     });
@@ -165,7 +150,6 @@ function printAnalytics(file, analytics) {
         .sort()
         .reverse()
         .forEach(weekKey => {
-            console.log([weekKey, ...analyticsRowToArray(byWeek[weekKey])]);
             byWeekTableOutput.push([weekKey, ...analyticsRowToArray(byWeek[weekKey])]);
         });
 
