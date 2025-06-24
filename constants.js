@@ -46,45 +46,61 @@ const ANALYTICS_METADATA_FIELDS = {
     SALE_CLOSE_RATE: 'Sale close %',
 };
 
+const NOTION_FIELDS = {
+    // Dark Label fields
+    FIRST_CONTACTED: 'First Contacted',
+    PROSPECT_FIRST_REPLY: 'Prospect First Reply',
+    CASUAL_CALL_BOOKED: 'Casual Call Booked',
+    CASUAL_CALL_ATTENDED: 'Casual Call Attended',
+    PROOF_SESSION_BOOKED: 'Proof Session Booked',
+    PROOF_SESSION_ATTENDED: 'Proof Session Attended',
+    SALES_CALL_BOOKED: 'Sales Call Booked',
+    SALES_CALL_ATTENDED: 'Sales Call Attended',
+    SALE_CLOSED: 'Sale Closed',
+    // Other fields
+    CURRENT_STEP: 'Current step',
+    FICHE: 'Fiche',
+    INSTAGRAM: 'Instagram',
+    TAGS: 'Tags',
+}
+
 const NOTION_ANALYTICS_FIELDS_MAP = [
     {
-        notionFieldName: 'First Contacted',
+        notionFieldName: NOTION_FIELDS.FIRST_CONTACTED,
         analyticsCountField: ANALYTICS_COLLECTED_FIELDS.FIRST_CONTACTED,
     },
     {
-        notionFieldName: 'Prospect First Reply',
+        notionFieldName: NOTION_FIELDS.PROSPECT_FIRST_REPLY,
         analyticsCountField: ANALYTICS_COLLECTED_FIELDS.FIRST_REPLY,
     },
     {
-        notionFieldName: 'Casual Call Booked',
+        notionFieldName: NOTION_FIELDS.CASUAL_CALL_BOOKED,
         analyticsCountField: ANALYTICS_COLLECTED_FIELDS.CC_BOOKED,
     },
     {
-        notionFieldName: 'Casual Call Attended',
+        notionFieldName: NOTION_FIELDS.CASUAL_CALL_ATTENDED,
         analyticsCountField: ANALYTICS_COLLECTED_FIELDS.CC_ATTENDED,
     },
     {
-        notionFieldName: 'Proof Session Booked',
+        notionFieldName: NOTION_FIELDS.PROOF_SESSION_BOOKED,
         analyticsCountField: ANALYTICS_COLLECTED_FIELDS.PS_BOOKED,
     },
     {
-        notionFieldName: 'Proof Session Attended',
+        notionFieldName: NOTION_FIELDS.PROOF_SESSION_ATTENDED,
         analyticsCountField: ANALYTICS_COLLECTED_FIELDS.PS_ATTENDED,
     },
     {
-        notionFieldName: 'Sales Call Booked',
+        notionFieldName: NOTION_FIELDS.SALES_CALL_BOOKED,
         analyticsCountField: ANALYTICS_COLLECTED_FIELDS.SC_BOOKED,
     },
     {
-        notionFieldName: 'Sales Call Attended',
+        notionFieldName: NOTION_FIELDS.SALES_CALL_ATTENDED,
         analyticsCountField: ANALYTICS_COLLECTED_FIELDS.SC_ATTENDED,
     },
     {
-        notionFieldName: 'Sale Closed',
+        notionFieldName: NOTION_FIELDS.SALE_CLOSED,
         analyticsCountField: ANALYTICS_COLLECTED_FIELDS.SALE_CLOSED,
     },
-    {
-    }
 ];
 
 const OUTPUT_ANALYTICS_FIELDS_ORDER = [
@@ -112,12 +128,15 @@ const OUTPUT_ANALYTICS_FIELDS_ORDER = [
 
 const NOTION_TAGS = {
     GOOD_CONVERSATION: 'Good conversation',
+    CASUAL_CALL_ASKED: 'Casual call asked',
+    CONVERSATION_TO_RESTART: 'Conversation to restart',
     DEAD_LEAD: 'Dead lead',
 };
 
 module.exports = {
-    NOTION_ANALYTICS_FIELDS_MAP,
+    NOTION_FIELDS,
     NOTION_TAGS,
+    NOTION_ANALYTICS_FIELDS_MAP,
     ANALYTICS_COLLECTED_FIELDS,
     ANALYTICS_FIELDS,
     ANALYTICS_METADATA_FIELDS,

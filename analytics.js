@@ -3,11 +3,12 @@ const fs = require('fs')
 const cliTable = require('cli-table');
 
 const {
+    NOTION_FIELDS,
+    NOTION_TAGS,
     ANALYTICS_COLLECTED_FIELDS,
     NOTION_ANALYTICS_FIELDS_MAP,
     ANALYTICS_METADATA_FIELDS,
     OUTPUT_ANALYTICS_FIELDS_ORDER,
-    NOTION_TAGS,
 } = require('./constants');
 const { getWeekKey, getPercentage } = require('./utils');
 
@@ -89,7 +90,7 @@ function getWeeklyAnalytics(rows) {
             return;
         }
 
-        const weekKey = getWeekKey(row['First Contacted']);
+        const weekKey = getWeekKey(row[NOTION_FIELDS.FIRST_CONTACTED]);
 
         const currentWeekStats = byWeek[weekKey] || getDefaultAnalytics();
 
@@ -102,13 +103,10 @@ function getWeeklyAnalytics(rows) {
             }
         });
 
-        const tags = row.Tags ? row.Tags.split(',') : [];
+        const rowTags = row[NOTION_FIELDS.TAGS] ? row.Tags.split(',') : [];
 
         // Gond convo
-        if (
-            tags.includes(NOTION_TAGS.GOOD_CONVERSATION)
-            || !['Conversation to start', 'Started conversation'].includes(row['Current step'])
-        ) {
+        if (rowTags.includes(NOTION_TAGS.GOOD_CONVERSATION) || !!row[NOTION_FIELDS.CASUAL_CALL_BOOKED]) {
             currentWeekStats[ANALYTICS_COLLECTED_FIELDS.GOOD_CONVERSATION]++;
         }
 
