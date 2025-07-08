@@ -38,9 +38,16 @@ function formatResults(rows) {
     }))
 }
 
-function loaderCsv(file) {
-    return getCsvData(file)
-        .then(formatResults);
+async function loaderCsv(file) {
+    console.info('⌛', `Loading data from CSV file: ${file}...`);
+    let results = await getCsvData(file);
+    console.info('🟢', 'Done');
+
+    console.info('⌛', 'Preparing rows for processing...');
+    results = formatResults(results);
+    console.info('🟢', 'Done');
+
+    return results;
 }
 
 module.exports = loaderCsv;

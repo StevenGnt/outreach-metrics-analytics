@@ -58,6 +58,7 @@ function filterResults(rows, { startDate, endDate }) {
 
     const {
         file,
+        print,
         'notion-db-id': notionDbId,
         'start-date': startDate,
         'end-date': endDate,
@@ -75,8 +76,12 @@ function filterResults(rows, { startDate, endDate }) {
         throw new Error('Provide one of "file" or "notion-url" parameters');
     }
 
-    results = filterResults(results, { startDate, endDate });
+    if (startDate || endDate) {
+        console.info('⌛', 'Filtering results...');
+        results = filterResults(results, { startDate, endDate });
+    }
 
+    console.info('⌛', 'Building analytics...');
     const analytics = getWeeklyAnalytics(results);
 
     if (saveCsv) {
@@ -89,11 +94,15 @@ function filterResults(rows, { startDate, endDate }) {
 
         const csvOutputFilename = path.join(outputDir, `${outputBaseFilename} analytics - ${datestamp}.csv`);
 
-        console.log('Saving analytics as CSV under', csvOutputFilename);
-        saveAnalyticsCsv(analytics, csvOutputFilename);
+        console.info('⌛', 'Saving analytics as CSV under', csvOutputFilename);
+        await saveAnalyticsCsv(analytics, csvOutputFilename);
     }
 
-    printAnalytics(file, analytics);
+    if (print) {
+        printAnalytics(file, analytics);
+    }
+
+    console.info('🟢', 'Done');
 })();
 
 // @todo
