@@ -146,7 +146,7 @@ function printAnalytics(file, analytics) {
 
     Object.keys(byWeek)
         .sort()
-        .reverse()
+        // .reverse()
         .forEach(weekKey => {
             byWeekTableOutput.push([weekKey, ...analyticsRowToArray(byWeek[weekKey])]);
         });
@@ -185,7 +185,7 @@ function saveAnalyticsCsv(analytics, filename) {
     // Data
     Object.keys(analytics.byWeek)
         .sort()
-        .reverse()
+        // .reverse()
         .forEach(weekKey => {
             csvRows.push([weekKey, ...analyticsRowToArray(analytics.byWeek[weekKey])]);
         });
