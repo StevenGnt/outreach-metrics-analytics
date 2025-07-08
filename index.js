@@ -1,55 +1,13 @@
 #!/usr/bin/env node
 
-const fs = require('fs')
 const path = require('path');
-const csv = require('csv-parser')
+const argsParser = require('args-parser');
 const { format, parse, compareAsc } = require('date-fns');
 
 const { getWeeklyAnalytics, saveAnalyticsCsv, printAnalytics } = require('./analytics');
-const { reformatDateFields, adjustDate } = require('./utils');
-
-/**
- * Return CLI args
- * @returns {object}
- */
-function getArgs() {
-    return process.argv.slice(2).reduce((params, nextArg) => ({ ...params, [nextArg.split("=")[0]]: nextArg.split("=")[1] }), {});
-}
-
-/**
- * Get the rows of an outreach metrics file, matched against a set of filters
- * @param {string} csvFilename
- * @param {object} filters
- * @returns {array}
-*/
-function getCsvData(csvFilename) {
-    return new Promise(resolve => {
-        const results = [];
-        const csvParserOptions = {};
-
-        fs.createReadStream(csvFilename)
-            .pipe(csv(csvParserOptions))
-            .on('data', row => {
-                results.push(row);
-            })
-            .on('end', () => {
-                resolve(results);
-            });
-    });
-}
-
-/**
- * Format the loaded results
- * @param {array} rows
- * @returns {array}
- */
-function formatResults(rows) {
-    return rows.map(row => ({
-        ...row,
-        ...reformatDateFields(row),
-
-    }))
-}
+const loaderCsv = require('./loader-csv');
+const loaderNotion = require('./loader-notion');
+const { adjustDate } = require('./utils');
 
 /**
  * Parse a CLI date parameter
@@ -95,41 +53,48 @@ function filterResults(rows, { startDate, endDate }) {
     });
 }
 
-const args = getArgs();
+(async function run() {
+    const cmdArgs = argsParser(process.argv);
 
-function hasArg(argName) {
-    return argName in args;
-}
+    const {
+        file,
+        'notion-db-id': notionDbId,
+        'start-date': startDate,
+        'end-date': endDate,
+        'save-csv': saveCsv,
+        output,
+    } = cmdArgs;
 
-const {
-    '--file': file,
-    '--output': output,
-    '--start-date': startDate,
-    '--end-date': endDate,
-} = args;
-const filters = { startDate, endDate };
+    // Get data from the appropriate channel
+    let results;
+    if (file) {
+        results = await loaderCsv(file);
+    } else if (notionDbId) {
+        results = await loaderNotion(notionDbId);
+    } else {
+        throw new Error('Provide one of "file" or "notion-url" parameters');
+    }
 
-if (!file) {
-    throw new Error('No input file specified');
-}
+    results = filterResults(results, { startDate, endDate });
 
-getCsvData(file)
-    .then(formatResults)
-    .then(results => filterResults(results, filters))
-    .then(getWeeklyAnalytics)
-    .then(analytics => {
-        if (hasArg('--save-csv')) {
-            const datestamp = format(new Date(), 'yyyy-MM-dd--HH-mm-ss');
-            const outputDir = output || process.cwd();
-            const csvOutputFilename = path.join(outputDir, `${path.basename(file)} analytics - ${datestamp}.csv`);
+    const analytics = getWeeklyAnalytics(results);
 
-            console.log('Saving analytics as CSV under', csvOutputFilename);
-            saveAnalyticsCsv(analytics, csvOutputFilename);
-        }
+    if (saveCsv) {
+        const datestamp = format(new Date(), 'yyyy-MM-dd--HH-mm-ss');
+        const outputDir = output || process.cwd();
 
-        return analytics;
-    })
-    .then(analytics => printAnalytics(file, analytics));
+        const outputBaseFilename = file
+            ? path.basename(file)
+            : notionDbId;
+
+        const csvOutputFilename = path.join(outputDir, `${outputBaseFilename} analytics - ${datestamp}.csv`);
+
+        console.log('Saving analytics as CSV under', csvOutputFilename);
+        saveAnalyticsCsv(analytics, csvOutputFilename);
+    }
+
+    printAnalytics(file, analytics);
+})();
 
 // @todo
 // Timezone stuff
